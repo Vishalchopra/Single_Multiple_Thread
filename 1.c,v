@@ -1,0 +1,107 @@
+head	1.4;
+access;
+symbols;
+locks
+	vishal:1.4; strict;
+comment	@ * @;
+
+
+1.4
+date	2015.04.16.12.27.37;	author vishal;	state Exp;
+branches;
+next	1.3;
+
+1.3
+date	2015.04.16.12.17.42;	author vishal;	state Exp;
+branches;
+next	1.2;
+
+1.2
+date	2015.04.16.12.00.35;	author vishal;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	2015.04.16.11.59.39;	author vishal;	state Exp;
+branches;
+next	;
+
+
+desc
+@Create the thread .
+And also create a func.
+@
+
+
+1.4
+log
+@*** empty log message ***
+@
+text
+@#include<stdio.h>
+#include<pthread.h>
+int flag ;
+void * func(void *p)
+{
+	int *a = (int *)p;	
+	printf("%s  %d\n", __func__, *a);
+	flag = 0;
+	
+	
+}
+int main()
+{
+	flag = 1;
+	pthread_t thrd;
+	int a = 5;
+	pthread_create(&thrd, NULL, &func, &a);
+	while(flag);
+	printf("After the termination of the thread\n");
+	return 0;
+}
+
+
+@
+
+
+1.3
+log
+@*** empty log message ***
+@
+text
+@d17 1
+a17 1
+	pthread_create(&thrd, NULL, &func, (void *)&a);
+@
+
+
+1.2
+log
+@*** empty log message ***
+@
+text
+@d4 1
+a4 2
+//void (*func)(int *);
+func(int *p)
+d6 2
+a7 1
+	printf("%s  %d\n", __func__, *p);
+d15 1
+a15 1
+	pthread_t *thrd;
+d17 1
+a17 1
+	pthread_create(&thrd, NULL, &func, &a);
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d5 1
+a5 1
+func(int p)
+@

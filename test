@@ -1,0 +1,35 @@
+ci 1.c 
+co 1.c
+
+gcc 1.c -lpthread -o 1
+
+func()
+{
+	rm 1.c
+	co -l 1.c
+}
+
+if( ./1 )
+then
+	func
+else
+	func
+fi
+
+RCS file: multi_thread.c,v
+Working file: multi_thread.c
+head: 1.1
+branch:
+locks: strict
+	vishal: 1.1
+access list:
+symbolic names:
+keyword substitution: kv
+total revisions: 1;	selected revisions: 1
+description:
+Three different thread is created to open a file read the data from the file and write on some other file exclusively.
+----------------------------
+revision 1.1	locked by: vishal;
+date: 2015/04/21 16:46:47;  author: vishal;  state: Exp;
+Initial revision
+=============================================================================

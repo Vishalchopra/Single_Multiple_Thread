@@ -1,0 +1,115 @@
+head	1.1;
+access;
+symbols;
+locks
+	vishal:1.1; strict;
+comment	@ * @;
+
+
+1.1
+date	2015.04.21.16.46.47;	author vishal;	state Exp;
+branches;
+next	;
+
+
+desc
+@Three different thread is created to open a file read the data from the file and write on some other file exclusively.
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@#include<stdio.h>
+#include<pthread.h>
+#include<fcntl.h>
+#include<semaphore.h>
+#include<string.h>
+
+int create_thrd();
+void *thrd_opn(void *);
+void *thrd_read(void *);
+void *thrd_write(void *);
+
+pthread_t thrd[10];
+pthread_attr_t tattr;
+const int fd_thrd;
+sem_t sem_thrd;
+char *text;
+int main()
+{
+	text = (char *)malloc(sizeof(char)*30);
+	create_thrd();
+}
+
+int create_thrd()
+{
+	int ret, k;
+	static int i = 0;
+	char *rept;
+	k = 0;
+	while(1)
+	{
+		if(i > 0)
+		printf("File discriptor after the while :-    %d ....%d\n", fd_thrd, i);
+		sem_init(&sem_thrd, 0, 1);
+		ret = pthread_attr_init(&tattr);
+		ret = pthread_attr_setdetachstate(&tattr, PTHREAD_CREATE_DETACHED);
+		if(i == 0)
+			pthread_create(&thrd[i], &tattr, &thrd_opn, (void *)& i);
+		sleep(1);
+		i++;
+		pthread_create(&thrd[i], &tattr, &thrd_read, (void *) &i);
+		sleep(1);
+		i++;
+		k = i;
+		if(pthread_create(&thrd[k], NULL, &thrd_write, (void *)&i) != 0)
+			perror("pthread_create");
+		sleep(1);
+		pthread_join(thrd[k], &rept);
+		printf("%s...........\n", rept);
+	}
+}
+void *thrd_opn(void *arg)
+{
+	int *i;
+	i = (int *)arg;
+	sem_wait(&sem_thrd);	
+	int fd_thrd = open("text_thread", O_RDWR| O_CREAT);
+	printf("The file discriptor in open:-   %d\n", fd_thrd);
+	sem_post(&sem_thrd);
+}
+
+
+void *thrd_read(void *arg)
+{
+	int *i, stlen;
+	i = (int *)arg;
+	sem_wait(&sem_thrd);	
+	printf("The file discriptor in read:-   %d\n", fd_thrd);
+	printf("Enter the text\n");
+	fgets(text, BUFSIZ, stdin);
+	//stlen = gets(text);
+	//stlen = strlen(text);
+	//text[stlen ] = '\n';
+	printf("%s  %d  in the read\n", __func__, strlen(text));
+	sem_post(&sem_thrd);
+}
+
+void *thrd_write(void *arg)
+{
+	int *i;
+	i = (int *)arg;
+	char a = 'a';
+	sem_wait(&sem_thrd);	
+	printf("File Discriptor in thrd_write = %d\n", fd_thrd);
+	write(fd_thrd, text, strlen(text));
+	//close(fd_thrd);
+	sem_post(&sem_thrd);
+	sem_destroy(&sem_thrd);
+	pthread_exit("bye");
+
+}
+@
